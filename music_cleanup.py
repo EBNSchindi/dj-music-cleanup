@@ -391,8 +391,68 @@ class MusicLibraryCleanup:
             percent = (count / len(sample_files)) * 100
             print(f"  {field}: {percent:.1f}%")
         
-        print("\nUse --dry-run to see what changes would be made")
+        print("\nUse --quality-analysis to analyze audio quality")
+        print("Use --dry-run to see what changes would be made")
         print("Use --execute to perform the cleanup")
+    
+    def analyze_audio_quality(self):
+        """Run comprehensive audio quality analysis"""
+        self.logger.info("Running audio quality analysis...")
+        
+        # Scan files
+        music_files = self.scan_music_files()
+        if not music_files:
+            self.logger.warning("No music files found")
+            return
+        
+        # Process files with quality analysis
+        fingerprint_data = self.process_fingerprinting(music_files)
+        
+        # Get quality statistics
+        stats = self.fingerprinter.get_statistics()
+        quality_report = self.fingerprinter.get_quality_report()
+        
+        # Display results
+        print("\n" + "=" * 60)
+        print("AUDIO QUALITY ANALYSIS REPORT")
+        print("=" * 60)
+        
+        print(f"Total files analyzed: {quality_report['total_files_analyzed']}")
+        
+        if quality_report['quality_summary']['quality_distribution']:
+            print("\nQuality Distribution:")
+            for rating, count in quality_report['quality_summary']['quality_distribution'].items():
+                print(f"  {rating}: {count} files")
+        
+        if quality_report['quality_summary']['issue_distribution']:
+            print("\nDetected Issues:")
+            for issue, count in quality_report['quality_summary']['issue_distribution'].items():
+                print(f"  {issue}: {count} files")
+        
+        if quality_report['recommendations']:
+            print("\nRecommendations:")
+            for rec in quality_report['recommendations']:
+                print(f"  • {rec}")
+        
+        # Show most problematic files
+        if quality_report['problematic_files']:
+            print(f"\nMost Problematic Files (showing first 10):")
+            for i, file_info in enumerate(quality_report['problematic_files'][:10]):
+                print(f"  {i+1}. {file_info['file_path']}")
+                print(f"     Quality: {file_info['quality_rating']} (score: {file_info['quality_score']})")
+                print(f"     Issues: {', '.join(file_info['issues'])}")
+                print(f"     Format: {file_info['format']} @ {file_info['bitrate']} kbps")
+                print()
+        
+        # Show statistics
+        print(f"\nOverall Statistics:")
+        print(f"  Files with quality issues: {stats['files_with_issues']}")
+        print(f"  Duplicate groups found: {stats['duplicate_groups']}")
+        print(f"  Total duplicate files: {stats['duplicate_files']}")
+        
+        print("\n" + "=" * 60)
+        print("Quality analysis complete!")
+        print("=" * 60)
 
 
 def main():
@@ -403,6 +463,7 @@ def main():
         epilog="""
 Examples:
   %(prog)s --scan-only          # Analyze library without changes
+  %(prog)s --quality-analysis   # Analyze audio quality and detect issues
   %(prog)s --dry-run           # Show what would be done
   %(prog)s --execute           # Perform full cleanup
   %(prog)s --resume            # Resume interrupted cleanup
@@ -414,6 +475,8 @@ Examples:
     mode_group = parser.add_mutually_exclusive_group(required=True)
     mode_group.add_argument('--scan-only', action='store_true',
                            help='Only analyze library, no changes')
+    mode_group.add_argument('--quality-analysis', action='store_true',
+                           help='Analyze audio quality and detect issues')
     mode_group.add_argument('--dry-run', action='store_true',
                            help='Simulate cleanup and show what would be done')
     mode_group.add_argument('--execute', action='store_true',
@@ -449,6 +512,8 @@ Examples:
         
         if args.scan_only:
             cleanup.analyze_only()
+        elif args.quality_analysis:
+            cleanup.analyze_audio_quality()
         elif args.dry_run:
             cleanup.config.set('dry_run', True)
             cleanup.run_full_cleanup(dry_run=True, resume=args.resume)

@@ -11,13 +11,16 @@ A professional-grade Python tool for cleaning, organizing, and deduplicating lar
 ## Features
 
 - **Audio Fingerprinting**: Uses Chromaprint/AcoustID to identify truly duplicate tracks regardless of metadata
-- **Intelligent Duplicate Detection**: Automatically selects the highest quality version (FLAC > WAV > 320kbps MP3 > lower bitrates)
+- **Advanced Quality Analysis**: Comprehensive audio quality scoring (0-1000 scale) with corruption detection
+- **Intelligent Duplicate Detection**: Automatically selects the highest quality version using advanced quality metrics
+- **Audio Error Detection**: Detects MP3 sync errors, FLAC corruption, file truncation, and 15+ quality issues
+- **Quality-Based Ranking**: Ranks duplicates by actual audio quality, not just format/bitrate
 - **Metadata Enhancement**: Enriches missing metadata using MusicBrainz database
 - **Smart Organization**: Organizes files by Genre/Decade structure
 - **Protected Folders**: Never modifies files in designated core/master folders
 - **Safe Operation**: Only copies files, never deletes originals
 - **Resume Capability**: Can resume interrupted operations
-- **Comprehensive Reporting**: Generates detailed HTML reports and duplicate lists
+- **Comprehensive Reporting**: Generates detailed HTML reports with quality analysis and duplicate lists
 - **Undo Functionality**: Creates scripts to reverse operations if needed
 
 ## Requirements
@@ -119,27 +122,38 @@ This shows:
 - Metadata completeness
 - No files are modified
 
-### 2. Dry Run (Preview Changes)
+### 2. Audio Quality Analysis
+```bash
+python music_cleanup.py --quality-analysis --config my_config.json
+```
+This provides:
+- Comprehensive quality analysis report
+- Audio corruption detection
+- Quality distribution across your library
+- Problematic files with specific issues
+- Actionable quality improvement recommendations
+
+### 3. Dry Run (Preview Changes)
 ```bash
 python music_cleanup.py --dry-run --config my_config.json
 ```
 This shows:
 - What files would be copied where
-- Which duplicates would be handled
+- Which duplicates would be handled (with quality analysis)
 - How much space would be saved
 - Still no actual changes made
 
-### 3. Execute Cleanup
+### 4. Execute Cleanup
 ```bash
 python music_cleanup.py --execute --config my_config.json
 ```
 This will:
 - Copy files to organized structure
-- Handle duplicates (keep best quality)
-- Generate reports
+- Handle duplicates (keep highest quality version)
+- Generate comprehensive reports with quality analysis
 - Create undo script
 
-### 4. Resume Interrupted Operation
+### 5. Resume Interrupted Operation
 ```bash
 python music_cleanup.py --execute --resume
 ```
@@ -178,11 +192,16 @@ After execution, find these in the `reports/` folder:
    - Space saved
 
 2. **Duplicate List** (`duplicates_YYYYMMDD_HHMMSS.txt`)
-   - All duplicate groups
-   - Quality comparison
-   - File paths
+   - All duplicate groups with quality analysis
+   - Quality comparison and scores
+   - File paths and recommendations
 
-3. **Undo Script** (`undo_operations.sh`)
+3. **Quality Report** (`quality_analysis_YYYYMMDD_HHMMSS.txt`)
+   - Detailed quality analysis for all files
+   - Audio corruption issues detected
+   - Quality improvement recommendations
+
+4. **Undo Script** (`undo_operations.sh`)
    - Reverses all copy operations
    - Use if you need to undo
 
@@ -216,9 +235,15 @@ After execution, find these in the `reports/` folder:
 - Check folder permissions
 - Run as administrator (Windows) if needed
 
+### Audio Quality Issues
+- Use `--quality-analysis` to detect corrupted files
+- Check quality reports for specific issues
+- Corrupted files are automatically flagged and skipped
+
 ### Corrupted files
 - Check `logs/` folder for details
-- Corrupted files are skipped automatically
+- Quality analysis provides detailed corruption reports
+- Files with sync errors or invalid headers are identified
 
 ## Safety Features
 
@@ -227,6 +252,34 @@ After execution, find these in the `reports/` folder:
 3. **Verification**: Each copy is verified for integrity
 4. **Logging**: All operations are logged
 5. **Undo Script**: Can reverse all operations
+
+## Audio Quality Analysis
+
+The tool now includes comprehensive audio quality analysis capabilities:
+
+### Quality Scoring System
+- **0-1000 point scale** based on format, bitrate, sample rate, and metadata completeness
+- **Quality ratings**: Excellent, Very Good, Good, Acceptable, Poor, Very Poor
+- **Format priorities**: FLAC (1000) > WAV (990) > MP3 320kbps (900) > lower quality
+
+### Audio Error Detection
+- **MP3 Corruption**: Sync word validation, header integrity checks
+- **FLAC Corruption**: File signature validation, header verification
+- **File Integrity**: Truncation detection, size vs duration consistency
+- **Quality Issues**: Low bitrate detection, mono audio flagging, suspicious durations
+
+### Quality-Based Duplicate Handling
+- Duplicates are ranked by comprehensive quality analysis, not just format
+- Automatically selects the version with highest quality score
+- Considers both technical quality and metadata completeness
+- Reports quality differences between duplicate versions
+
+### Quality Analysis Report
+Run `--quality-analysis` to get:
+- Overall quality distribution of your library
+- List of files with detected issues
+- Specific corruption problems identified
+- Actionable recommendations for quality improvement
 
 ## Advanced Usage
 

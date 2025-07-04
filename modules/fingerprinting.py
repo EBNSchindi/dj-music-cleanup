@@ -28,6 +28,7 @@ from mutagen.mp4 import MP4
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
+from .audio_quality import AudioQualityAnalyzer
 
 
 class AudioFingerprinter:
@@ -38,6 +39,7 @@ class AudioFingerprinter:
         self.db_path = db_path
         self.acoustid_key = acoustid_key
         self.logger = logging.getLogger(__name__)
+        self.quality_analyzer = AudioQualityAnalyzer()
         self._init_database()
         
     def _init_database(self):
@@ -59,7 +61,10 @@ class AudioFingerprinter:
                 channels INTEGER,
                 created_at TIMESTAMP,
                 acoustid_id TEXT,
-                metadata TEXT
+                metadata TEXT,
+                quality_score INTEGER,
+                quality_rating TEXT,
+                quality_issues TEXT
             )
         ''')
         
@@ -209,7 +214,7 @@ class AudioFingerprinter:
             return None, None
     
     def store_fingerprint(self, file_path: str, fingerprint: str, duration: float, 
-                         audio_info: Dict, file_hash: str):
+                         audio_info: Dict, file_hash: str, quality_analysis: Dict = None):
         """Store fingerprint in database"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -218,8 +223,9 @@ class AudioFingerprinter:
             cursor.execute('''
                 INSERT OR REPLACE INTO fingerprints 
                 (file_path, fingerprint, duration, file_hash, file_size, 
-                 format, bitrate, sample_rate, channels, created_at, metadata)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 format, bitrate, sample_rate, channels, created_at, metadata,
+                 quality_score, quality_rating, quality_issues)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 file_path,
                 fingerprint,
@@ -231,7 +237,10 @@ class AudioFingerprinter:
                 audio_info.get('sample_rate', 0),
                 audio_info.get('channels', 0),
                 datetime.now().isoformat(),
-                json.dumps(audio_info.get('metadata', {}))
+                json.dumps(audio_info.get('metadata', {})),
+                quality_analysis.get('quality_score', 0) if quality_analysis else 0,
+                quality_analysis.get('quality_rating', 'unknown') if quality_analysis else 'unknown',
+                json.dumps(quality_analysis.get('issues', [])) if quality_analysis else '[]'
             ))
             
             conn.commit()
@@ -272,6 +281,9 @@ class AudioFingerprinter:
             if not audio_info:
                 return None
             
+            # Perform quality analysis
+            quality_analysis = self.quality_analyzer.analyze_audio_quality(file_path)
+            
             # Generate or use cached fingerprint
             if cached_fp:
                 fingerprint = cached_fp
@@ -282,15 +294,16 @@ class AudioFingerprinter:
                 if not fingerprint:
                     return None
                 
-                # Store in database
-                self.store_fingerprint(file_path, fingerprint, duration, audio_info, file_hash)
+                # Store in database with quality analysis
+                self.store_fingerprint(file_path, fingerprint, duration, audio_info, file_hash, quality_analysis)
             
             return {
                 'file_path': file_path,
                 'fingerprint': fingerprint,
                 'duration': duration,
                 'file_hash': file_hash,
-                'audio_info': audio_info
+                'audio_info': audio_info,
+                'quality_analysis': quality_analysis
             }
             
         except Exception as e:
@@ -304,7 +317,8 @@ class AudioFingerprinter:
         
         # Get all fingerprints
         cursor.execute('''
-            SELECT file_path, fingerprint, duration, format, bitrate, file_size, metadata
+            SELECT file_path, fingerprint, duration, format, bitrate, file_size, metadata, 
+                   quality_score, quality_rating, quality_issues
             FROM fingerprints
             WHERE fingerprint IS NOT NULL
         ''')
@@ -318,7 +332,10 @@ class AudioFingerprinter:
                 'format': row[3],
                 'bitrate': row[4],
                 'file_size': row[5],
-                'metadata': json.loads(row[6]) if row[6] else {}
+                'metadata': json.loads(row[6]) if row[6] else {},
+                'quality_score': row[7] if row[7] else 0,
+                'quality_rating': row[8] if row[8] else 'unknown',
+                'quality_issues': json.loads(row[9]) if row[9] else []
             })
         
         conn.close()
@@ -340,7 +357,37 @@ class AudioFingerprinter:
         return duplicate_groups
     
     def rank_duplicates(self, duplicate_group: List[Dict]) -> List[Dict]:
-        """Rank duplicates by quality"""
+        """Rank duplicates by quality using advanced quality analysis"""
+        # Use the quality analyzer for duplicate comparison
+        files_for_analysis = []
+        for file_data in duplicate_group:
+            files_for_analysis.append({
+                'file_path': file_data['file_path'],
+                'quality_score': file_data.get('quality_score', 0),
+                'quality_rating': file_data.get('quality_rating', 'unknown'),
+                'quality_issues': file_data.get('quality_issues', [])
+            })
+        
+        # Use quality analyzer comparison
+        comparison_result = self.quality_analyzer.compare_duplicate_quality(files_for_analysis)
+        
+        if comparison_result and comparison_result.get('quality_comparison'):
+            # Sort by quality score from advanced analysis
+            sorted_files = comparison_result['quality_comparison']
+            
+            # Map back to original file data structure
+            ranked_files = []
+            for analyzed_file in sorted_files:
+                original_file = next((f for f in duplicate_group if f['file_path'] == analyzed_file['file_path']), None)
+                if original_file:
+                    # Add quality information from analysis
+                    original_file['advanced_quality_score'] = analyzed_file.get('quality_score', 0)
+                    original_file['quality_issues'] = analyzed_file.get('quality_issues', [])
+                    ranked_files.append(original_file)
+            
+            return ranked_files
+        
+        # Fallback to original ranking if quality analysis fails
         format_priority = {
             'flac': 1000,
             'wav': 990,
@@ -421,5 +468,101 @@ class AudioFingerprinter:
         stats['duplicate_groups'] = len(duplicate_groups)
         stats['duplicate_files'] = sum(len(group) for group in duplicate_groups)
         
+        # Quality statistics
+        cursor.execute('''
+            SELECT quality_rating, COUNT(*) as count 
+            FROM fingerprints 
+            WHERE quality_rating IS NOT NULL
+            GROUP BY quality_rating 
+            ORDER BY count DESC
+        ''')
+        stats['quality_distribution'] = dict(cursor.fetchall())
+        
+        # Files with quality issues
+        cursor.execute('''
+            SELECT COUNT(*) FROM fingerprints 
+            WHERE quality_issues IS NOT NULL 
+            AND quality_issues != '[]'
+        ''')
+        stats['files_with_issues'] = cursor.fetchone()[0]
+        
         conn.close()
         return stats
+    
+    def get_quality_report(self) -> Dict:
+        """Get detailed quality analysis report"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        report = {
+            'total_files_analyzed': 0,
+            'quality_summary': {},
+            'problematic_files': [],
+            'recommendations': []
+        }
+        
+        # Get all files with quality analysis
+        cursor.execute('''
+            SELECT file_path, quality_score, quality_rating, quality_issues, 
+                   format, bitrate, file_size 
+            FROM fingerprints 
+            WHERE quality_score IS NOT NULL
+        ''')
+        
+        files = cursor.fetchall()
+        report['total_files_analyzed'] = len(files)
+        
+        # Quality distribution
+        quality_counts = {}
+        issue_counts = {}
+        
+        for file_data in files:
+            file_path, quality_score, quality_rating, quality_issues_json, format_type, bitrate, file_size = file_data
+            
+            # Count quality ratings
+            quality_counts[quality_rating] = quality_counts.get(quality_rating, 0) + 1
+            
+            # Parse and count issues
+            try:
+                quality_issues = json.loads(quality_issues_json) if quality_issues_json else []
+                for issue in quality_issues:
+                    issue_counts[issue] = issue_counts.get(issue, 0) + 1
+                
+                # Add to problematic files if has issues
+                if quality_issues:
+                    report['problematic_files'].append({
+                        'file_path': file_path,
+                        'quality_score': quality_score,
+                        'quality_rating': quality_rating,
+                        'issues': quality_issues,
+                        'format': format_type,
+                        'bitrate': bitrate,
+                        'file_size_mb': round(file_size / (1024 * 1024), 2) if file_size else 0
+                    })
+                    
+            except (json.JSONDecodeError, TypeError):
+                continue
+        
+        report['quality_summary'] = {
+            'quality_distribution': quality_counts,
+            'issue_distribution': issue_counts
+        }
+        
+        # Generate recommendations
+        recommendations = []
+        if issue_counts.get('very_low_bitrate', 0) > 0:
+            recommendations.append(f"Found {issue_counts['very_low_bitrate']} files with very low bitrate - consider finding higher quality sources")
+        
+        if issue_counts.get('corrupted_header', 0) > 0:
+            recommendations.append(f"Found {issue_counts['corrupted_header']} files with corrupted headers - re-download recommended")
+        
+        if issue_counts.get('no_metadata', 0) > 0:
+            recommendations.append(f"Found {issue_counts['no_metadata']} files with missing metadata - consider adding tags")
+        
+        if quality_counts.get('very_poor', 0) > 0:
+            recommendations.append(f"Found {quality_counts['very_poor']} files with very poor quality - consider replacing")
+        
+        report['recommendations'] = recommendations
+        
+        conn.close()
+        return report
