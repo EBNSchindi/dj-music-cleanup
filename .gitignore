@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Reports
+reports/
+
+# Test data
+music_test_data/
+
+# Configuration files with sensitive data
+*_config.json
+!test_config.json
+!final_production_config.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+AlbumArtSmall.jpg
+Folder.jpg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Backup files
+*.bak
+*.backup
+
+# Undo scripts (contain local paths)
+undo_operations.sh

@@ -1,0 +1,23 @@
+{
+    "protected_folders": [],
+    "source_folders": [
+        "/home/vboxuser/claude-projects-secure/music_test_data/input"
+    ],
+    "target_folder": "/home/vboxuser/claude-projects-secure/music_test_data/output",
+    "quality_priority": ["flac", "wav", "mp3_320", "mp3_256", "mp3_192", "mp3_128"],
+    "genre_mapping": "auto",
+    "decade_fallback": "2020s",
+    "batch_size": 50,
+    "enable_musicbrainz": true,
+    "create_backup_list": true,
+    "multiprocessing_workers": 2,
+    "fingerprint_cache_db": "test_fingerprints.db",
+    "log_level": "INFO",
+    "dry_run": false,
+    "resume_enabled": true,
+    "min_file_size_mb": 0.001,
+    "max_file_size_mb": 100,
+    "supported_formats": [".mp3", ".flac", ".wav", ".m4a", ".ogg", ".wma", ".aac"],
+    "acoustid_api_key": null,
+    "musicbrainz_contact": "dj-cleanup@example.com"
+}

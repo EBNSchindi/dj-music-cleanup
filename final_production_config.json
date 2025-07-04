@@ -1,0 +1,133 @@
+{
+    "comment": "Optimierte Konfiguration für große DJ-Bibliotheken (300.000+ Dateien)",
+    
+    "protected_folders": [
+        "D:\\Core-Library",
+        "D:\\Master-Collection", 
+        "D:\\DJ-Sets\\Live-Recordings",
+        "D:\\Backup\\Master"
+    ],
+    
+    "source_folders": [
+        "D:\\Music\\Unsorted",
+        "D:\\Downloads\\Music",
+        "E:\\Backup\\Music",
+        "F:\\Various\\Audio",
+        "G:\\External\\Music"
+    ],
+    
+    "target_folder": "D:\\Bereinigt",
+    
+    "quality_priority": [
+        "flac", 
+        "wav", 
+        "mp3_320", 
+        "mp3_256", 
+        "mp3_192", 
+        "mp3_128",
+        "mp3_vbr",
+        "m4a",
+        "aac",
+        "ogg"
+    ],
+    
+    "performance_settings": {
+        "batch_size": 3000,
+        "multiprocessing_workers": 12,
+        "fingerprint_cache_db": "production_fingerprints.db",
+        "resume_enabled": true
+    },
+    
+    "metadata_enrichment": {
+        "enable_musicbrainz": true,
+        "musicbrainz_contact": "ihre-email@example.com",
+        "acoustid_api_key": null
+    },
+    
+    "file_filtering": {
+        "min_file_size_mb": 0.5,
+        "max_file_size_mb": 100,
+        "supported_formats": [".mp3", ".flac", ".wav", ".m4a", ".ogg", ".wma", ".aac"]
+    },
+    
+    "organization": {
+        "genre_mapping": "auto",
+        "decade_fallback": "2020s",
+        "create_backup_list": true
+    },
+    
+    "logging": {
+        "log_level": "INFO",
+        "dry_run": false
+    },
+    
+    "genre_categories": {
+        "House": [
+            "house", "deep house", "tech house", "progressive house", 
+            "electro house", "future house", "big room house", "tropical house",
+            "afro house", "bass house", "funky house"
+        ],
+        "Techno": [
+            "techno", "minimal techno", "detroit techno", "acid techno", 
+            "hard techno", "industrial techno", "melodic techno"
+        ],
+        "Trance": [
+            "trance", "uplifting trance", "progressive trance", "psytrance", 
+            "goa trance", "vocal trance", "tech trance", "hard trance"
+        ],
+        "Drum & Bass": [
+            "drum and bass", "drum & bass", "dnb", "jungle", 
+            "liquid dnb", "neurofunk", "jump up", "darkstep"
+        ],
+        "Dubstep": [
+            "dubstep", "brostep", "future garage", "riddim", 
+            "melodic dubstep", "heavy dubstep"
+        ],
+        "Hip-Hop": [
+            "hip hop", "hip-hop", "rap", "trap", "boom bap", 
+            "drill", "grime", "old school rap", "gangsta rap"
+        ],
+        "Pop": [
+            "pop", "dance pop", "electropop", "synthpop", "indie pop",
+            "teen pop", "bubblegum pop", "k-pop"
+        ],
+        "Electronic": [
+            "electronic", "edm", "electronica", "ambient", "experimental",
+            "IDM", "breakbeat", "downtempo", "chillout"
+        ],
+        "Rock": [
+            "rock", "alternative rock", "indie rock", "punk rock", 
+            "hard rock", "classic rock", "progressive rock"
+        ],
+        "Dance": [
+            "dance", "eurodance", "freestyle", "hi-nrg", "italo disco",
+            "euro house", "hands up", "hardstyle"
+        ],
+        "Disco": [
+            "disco", "funk", "soul", "motown", "nu-disco", "disco house"
+        ],
+        "Reggae": [
+            "reggae", "dub", "dancehall", "ska", "ragga", "roots reggae"
+        ],
+        "New Wave": [
+            "new wave", "synthwave", "darkwave", "post-punk", 
+            "cold wave", "minimal wave"
+        ],
+        "Jazz": [
+            "jazz", "smooth jazz", "fusion", "bebop", "swing", "blues"
+        ],
+        "Classical": [
+            "classical", "orchestral", "chamber music", "opera", "baroque"
+        ],
+        "Latin": [
+            "latin", "salsa", "reggaeton", "bachata", "merengue", "cumbia"
+        ],
+        "Country": [
+            "country", "folk", "bluegrass", "americana", "country rock"
+        ],
+        "Soundtrack": [
+            "soundtrack", "score", "film music", "tv music", "game music"
+        ],
+        "Unknown": []
+    }
+}
