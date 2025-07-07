@@ -14,7 +14,7 @@ Features:
 - Intelligent file organization
 """
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 __author__ = "DJ Music Cleanup Contributors"
 __email__ = "dj-music-cleanup@example.com"
 __license__ = "MIT"

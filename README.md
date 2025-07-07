@@ -22,6 +22,7 @@ Perfect for DJs managing large music collections (300K+ files) with enterprise-g
 - **Crash Recovery**: Automatic checkpoint system with signal-based crash detection
 - **Multi-Level Integrity**: 5 integrity checking levels from basic to paranoid
 - **Zero Data Loss**: Comprehensive backup and recovery mechanisms
+- **Unified Database**: Consolidated schema with foreign key relationships and data integrity
 
 ### 🎯 **Professional Features**
 - **Audio Fingerprinting**: Advanced duplicate detection using acoustic fingerprints
@@ -54,11 +55,17 @@ pip install -e .
 ### 2. **Basic Usage**
 
 ```bash
-# Organize your music library
-music-cleanup /path/to/music/folders /path/to/organized/library -o /organized/output
+# Organize your music library (default mode)
+music-cleanup /path/to/music/folders -o /path/to/organized/library
 
-# With recovery and fingerprinting enabled
-music-cleanup /music/source -o /music/organized --enable-fingerprinting --enable-recovery
+# Analyze library without changes
+music-cleanup /music/source -o /music/organized --mode analyze --report analysis.html
+
+# Clean up duplicates and optimize
+music-cleanup /music/source -o /music/organized --mode cleanup --enable-fingerprinting
+
+# Recover from previous interruption
+music-cleanup /music/source -o /music/organized --mode recover --recovery-id session_123
 
 # Dry run to see what would happen
 music-cleanup /music/source -o /music/organized --dry-run

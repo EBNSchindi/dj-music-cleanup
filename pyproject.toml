@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dj-music-cleanup"
-version = "2.0.0"
+version = "2.0.1"
 description = "Professional DJ music library cleanup and organization tool with streaming architecture and transactional safety"
 readme = "README.md"
 license = {file = "LICENSE"}

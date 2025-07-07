@@ -5,6 +5,43 @@ All notable changes to the DJ Music Cleanup Tool will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-01-07
+
+### 🛠️ Database Consolidation & CLI Completion
+
+### ✨ Added
+
+#### **Unified Database Architecture**
+- **Consolidated Schema**: Merged 3 separate databases into unified music_cleanup.db
+- **Foreign Key Relationships**: Proper referential integrity with CASCADE operations
+- **Data Migration System**: Complete migration from legacy database structure
+- **Performance Optimization**: Comprehensive indexes and triggers for optimal performance
+
+#### **Complete CLI Implementation**
+- **Four Operational Modes**: analyze, organize, cleanup, recover modes fully implemented
+- **Central Orchestrator**: MusicCleanupOrchestrator coordinates all modules efficiently
+- **Enhanced Integration**: Streaming pipeline with proper module dependency injection
+- **Professional Reporting**: HTML and JSON report generation for all modes
+
+#### **Migration & Testing**
+- **Database Migration Tool**: Command-line tool for migrating legacy databases
+- **Schema Validation**: Comprehensive testing of foreign key relationships
+- **Data Integrity Tests**: Validation of constraints and cascade operations
+- **Backup Management**: Automatic backup creation during migration
+
+### 🔧 Changed
+- **DatabaseManager**: Updated to use unified schema by default
+- **Module Integration**: Enhanced inter-module communication via streaming
+- **Error Handling**: Centralized error management through orchestrator
+- **Documentation**: Updated to reflect new architecture and CLI capabilities
+
+### 🐛 Fixed
+- **Memory Efficiency**: Maintained O(1) memory complexity in unified architecture
+- **Data Redundancy**: Eliminated duplicate storage across multiple databases
+- **Relationship Integrity**: Proper foreign key constraints prevent orphaned records
+
+---
+
 ## [2.0.0] - 2025-01-07
 
 ### 🎉 Major Release - Complete Project Refactoring

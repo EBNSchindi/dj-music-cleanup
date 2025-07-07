@@ -535,6 +535,18 @@ music-cleanup /music /organized \
    - [GitHub Issues](https://github.com/EBNSchindi/dj-music-cleanup/issues)
    - [Discussions](https://github.com/EBNSchindi/dj-music-cleanup/discussions)
 
+## 🏗️ Architecture Overview
+
+The DJ Music Cleanup Tool v2.0 uses a modern streaming architecture coordinated by the **MusicCleanupOrchestrator**. This central orchestrator manages all modules and provides:
+
+- **Streaming Pipeline**: Memory-efficient processing with O(1) memory complexity
+- **Module Coordination**: Lazy-loaded components (Fingerprinter, Metadata Manager, Quality Analyzer, File Organizer)
+- **Crash Recovery**: Automatic checkpoints and rollback capabilities
+- **Progress Tracking**: Real-time progress monitoring and reporting
+- **Error Handling**: Centralized error management with graceful degradation
+
+The orchestrator ensures all operations maintain transactional safety and can recover from interruptions seamlessly.
+
 ## 📈 Performance Expectations
 
 ### Typical Processing Speeds

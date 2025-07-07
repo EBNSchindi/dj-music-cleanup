@@ -159,26 +159,50 @@ class DatabaseManager:
         if not hasattr(self, '_initialized'):
             self._initialized = True
             self._pools: Dict[str, ConnectionPool] = {}
+            # Updated to use unified database by default
             self._db_configs: Dict[str, Dict[str, Any]] = {
+                'unified': {
+                    'filename': 'music_cleanup.db',
+                    'pool_size': 8,
+                    'description': 'Unified database with all tables and relationships'
+                },
+                # Legacy database configs (for migration purposes)
                 'fingerprints': {
                     'filename': 'fingerprints.db',
-                    'pool_size': 5
+                    'pool_size': 5,
+                    'legacy': True
                 },
                 'operations': {
                     'filename': 'file_operations.db',
-                    'pool_size': 3
+                    'pool_size': 3,
+                    'legacy': True
                 },
                 'progress': {
                     'filename': 'progress.db',
-                    'pool_size': 2
+                    'pool_size': 2,
+                    'legacy': True
                 }
             }
             self._base_path = Path.cwd()
+            self._use_unified = True  # Flag to use unified schema by default
             
     def set_base_path(self, path: Union[str, Path]):
         """Set the base path for database files"""
         self._base_path = Path(path)
         self._base_path.mkdir(parents=True, exist_ok=True)
+    
+    def use_unified_schema(self, enabled: bool = True):
+        """Enable or disable unified schema mode"""
+        self._use_unified = enabled
+        logger.info(f"Unified schema mode: {'enabled' if enabled else 'disabled'}")
+    
+    def is_unified_mode(self) -> bool:
+        """Check if unified schema mode is enabled"""
+        return getattr(self, '_use_unified', True)
+    
+    def get_default_database(self) -> str:
+        """Get the default database name based on mode"""
+        return 'unified' if self.is_unified_mode() else 'fingerprints'
         
     def initialize_database(self, db_name: str, schema_func: Optional[callable] = None):
         """Initialize a database with its schema"""
@@ -192,11 +216,21 @@ class DatabaseManager:
         pool = ConnectionPool(db_path, config['pool_size'])
         self._pools[db_name] = pool
         
-        # Initialize schema if provided
+        # Initialize schema
         if schema_func:
+            # Use provided schema function
             with self.get_connection(db_name) as conn:
                 schema_func(conn)
                 conn.commit()
+        elif db_name == 'unified':
+            # Use unified schema for unified database
+            from .unified_schema import initialize_unified_schema
+            with self.get_connection(db_name) as conn:
+                initialize_unified_schema(conn)
+                conn.commit()
+        elif not config.get('legacy', False):
+            # For non-legacy databases without explicit schema, try to detect schema
+            logger.warning(f"No schema function provided for {db_name}")
                 
         logger.info(f"Initialized database: {db_name} at {db_path}")
         
@@ -308,6 +342,45 @@ class DatabaseManager:
         self._pools.clear()
         logger.info("Closed all database connections")
         
+    def initialize_unified_database(self):
+        """Initialize the unified database with schema"""
+        self.initialize_database('unified')
+        return self.get_default_database()
+    
+    def check_migration_needed(self) -> bool:
+        """Check if migration from legacy databases is needed"""
+        if not self.is_unified_mode():
+            return False
+        
+        # Check if unified database exists
+        unified_path = self._base_path / self._db_configs['unified']['filename']
+        if unified_path.exists():
+            return False
+        
+        # Check if any legacy databases exist
+        legacy_dbs = ['fingerprints', 'operations', 'progress']
+        for db_name in legacy_dbs:
+            legacy_path = self._base_path / self._db_configs[db_name]['filename']
+            if legacy_path.exists():
+                logger.info(f"Found legacy database: {legacy_path}")
+                return True
+        
+        return False
+    
+    def get_legacy_database_paths(self) -> Dict[str, Path]:
+        """Get paths to legacy database files"""
+        return {
+            name: self._base_path / config['filename']
+            for name, config in self._db_configs.items()
+            if config.get('legacy', False)
+        }
+    
+    def suggest_migration(self) -> None:
+        """Suggest running migration if needed"""
+        if self.check_migration_needed():
+            logger.warning("Legacy databases detected. Consider running migration:")
+            logger.warning("python scripts/migrate_database.py --source-dir . --target music_cleanup.db")
+    
     def __del__(self):
         """Cleanup when the manager is destroyed"""
         if hasattr(self, '_pools'):
