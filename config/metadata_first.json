@@ -1,0 +1,177 @@
+{
+  "version": "2.0.0",
+  "description": "Metadata-First Configuration for DJ Music Cleanup Tool",
+  
+  "streaming_config": {
+    "batch_size": 25,
+    "max_workers": 2,
+    "memory_limit_mb": 1024,
+    "chunk_size_mb": 64,
+    "enable_parallel_processing": true,
+    "enable_memory_monitoring": true
+  },
+  
+  "recovery_config": {
+    "enable_auto_checkpoints": true,
+    "checkpoint_interval": 150,
+    "max_checkpoints": 30,
+    "enable_crash_detection": true,
+    "workspace_cleanup_days": 14
+  },
+  
+  "processing": {
+    "audio_formats": [
+      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
+      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
+    ],
+    "quality_threshold": 128,
+    "enable_fingerprinting": true,
+    "fingerprinting_timeout": 45,
+    "metadata_timeout": 30
+  },
+  
+  "paths": {
+    "output_dir": "./dj_library/organized",
+    "rejected_dir": "./dj_library/rejected",
+    "create_if_missing": true
+  },
+
+  "output_directories": {
+    "base_directory": "./dj_library",
+    "organized_dir": "./dj_library/organized",
+    "rejected_dir": "./dj_library/rejected",
+    "duplicates_dir": "./dj_library/rejected/duplicates",
+    "low_quality_dir": "./dj_library/rejected/low_quality",
+    "corrupted_dir": "./dj_library/rejected/corrupted",
+    "metadata_queue_dir": "./dj_library/metadata_queue",
+    "auto_create_dirs": true
+  },
+  
+  "organization": {
+    "structure": "genre/decade",
+    "naming_pattern": "{artist} - {title} [QS{score}%]",
+    "handle_duplicates": "keep_highest_quality",
+    "create_unknown_folders": false,
+    "sanitize_filenames": true,
+    "max_filename_length": 200
+  },
+
+  "rejection": {
+    "keep_structure": true,
+    "create_manifest": true,
+    "categories": {
+      "duplicates": "duplicates",
+      "low_quality": "low_quality",
+      "corrupted": "corrupted",
+      "unsupported": "unsupported",
+      "invalid_metadata": "invalid_metadata"
+    }
+  },
+
+  "quality": {
+    "min_score": 75,
+    "always_keep_best": true,
+    "auto_reject_below": 50
+  },
+  
+  "metadata": {
+    "fingerprint_first": true,
+    "min_confidence": 0.8,
+    "cache_ttl_days": 30,
+    "queue_unknown": true,
+    "never_create_unknown": true,
+    "fingerprint_length": 120,
+    "services": {
+      "acoustid": {
+        "enabled": true,
+        "api_key": "YOUR_ACOUSTID_API_KEY",
+        "timeout": 15,
+        "max_results": 10
+      },
+      "musicbrainz": {
+        "enabled": true,
+        "app_name": "DJ-Music-Cleanup/2.0",
+        "contact": "your-email@example.com",
+        "timeout": 20
+      },
+      "discogs": {
+        "enabled": false,
+        "api_key": "",
+        "timeout": 10
+      },
+      "beatport": {
+        "enabled": false,
+        "api_key": "",
+        "timeout": 10
+      }
+    }
+  },
+  
+  "integrity": {
+    "level": "full",
+    "checksum_algorithm": "sha256",
+    "enable_caching": true,
+    "cache_max_age_days": 14,
+    "enable_repair_suggestions": true
+  },
+  
+  "database": {
+    "backend": "sqlite",
+    "connection_pool_size": 8,
+    "enable_wal_mode": true,
+    "vacuum_interval_days": 7
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file": "./logs/dj_cleanup.log",
+    "max_size_mb": 50,
+    "backup_count": 10,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  },
+  
+  "features": {
+    "enable_progress_bars": true,
+    "enable_reports": true,
+    "enable_undo_scripts": true,
+    "enable_statistics": true
+  },
+  
+  "advanced": {
+    "protected_paths": [],
+    "custom_genres": {
+      "Progressive House": ["prog house", "progressive house"],
+      "Deep House": ["deep house", "deephouse"],
+      "Tech House": ["tech house", "techhouse"],
+      "Minimal Techno": ["minimal techno", "minimal"],
+      "Trance": ["trance", "uplifting trance", "psy trance"],
+      "Drum & Bass": ["drum and bass", "dnb", "d&b"],
+      "Dubstep": ["dubstep", "dub step"],
+      "Future Bass": ["future bass", "futurebass"],
+      "Trap": ["trap", "future trap"],
+      "Hardstyle": ["hardstyle", "hard style"]
+    },
+    "quality_scoring": {
+      "bitrate_weight": 0.5,
+      "sample_rate_weight": 0.3,
+      "format_weight": 0.15,
+      "file_size_weight": 0.05
+    },
+    "filename_patterns": {
+      "recognized_patterns": [
+        "BPM - Artist - Title (Remix).mp3",
+        "Artist - Title (Extended Mix) [Label].mp3",
+        "01. Artist - Title.mp3",
+        "128 BPM - Artist - Title.mp3",
+        "Artist_-_Title_[Label].mp3",
+        "Artist Title (Version).mp3"
+      ],
+      "cleanup_rules": {
+        "remove_track_numbers": true,
+        "normalize_separators": true,
+        "preserve_versions": true,
+        "preserve_labels": true
+      }
+    }
+  }
+}

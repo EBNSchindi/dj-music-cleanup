@@ -1,0 +1,136 @@
+{
+  "version": "2.0.0",
+  "description": "Default configuration for DJ Music Cleanup Tool",
+  
+  "streaming_config": {
+    "batch_size": 50,
+    "max_workers": 4,
+    "memory_limit_mb": 512,
+    "chunk_size_mb": 32,
+    "enable_parallel_processing": true,
+    "enable_memory_monitoring": true
+  },
+  
+  "recovery_config": {
+    "enable_auto_checkpoints": true,
+    "checkpoint_interval": 300,
+    "max_checkpoints": 20,
+    "enable_crash_detection": true,
+    "workspace_cleanup_days": 7
+  },
+  
+  "processing": {
+    "audio_formats": [
+      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
+      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
+    ],
+    "quality_threshold": 128,
+    "enable_fingerprinting": true,
+    "fingerprinting_timeout": 30,
+    "metadata_timeout": 10
+  },
+  
+  "paths": {
+    "output_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "create_if_missing": true
+  },
+
+  "output_directories": {
+    "base_directory": "./output",
+    "organized_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "duplicates_dir": "./rejected/duplicates",
+    "low_quality_dir": "./rejected/low_quality",
+    "corrupted_dir": "./rejected/corrupted",
+    "metadata_queue_dir": "./metadata_queue",
+    "auto_create_dirs": true
+  },
+  
+  "organization": {
+    "structure": "genre/decade",
+    "naming_pattern": "{artist} - {title} [QS{score}%]",
+    "handle_duplicates": "keep_highest_quality",
+    "create_unknown_folders": false,
+    "sanitize_filenames": true,
+    "max_filename_length": 150
+  },
+
+  "rejection": {
+    "keep_structure": true,
+    "create_manifest": true,
+    "categories": {
+      "duplicates": "duplicates",
+      "low_quality": "low_quality",
+      "corrupted": "corrupted"
+    }
+  },
+
+  "quality": {
+    "min_score": 70,
+    "always_keep_best": true
+  },
+  
+  "integrity": {
+    "level": "checksum",
+    "checksum_algorithm": "md5",
+    "enable_caching": true,
+    "cache_max_age_days": 7,
+    "enable_repair_suggestions": true
+  },
+  
+  "database": {
+    "backend": "sqlite",
+    "connection_pool_size": 5,
+    "enable_wal_mode": true,
+    "vacuum_interval_days": 30
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file": null,
+    "max_size_mb": 10,
+    "backup_count": 3,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  },
+  
+  "metadata": {
+    "fingerprint_first": true,
+    "min_confidence": 0.8,
+    "cache_ttl_days": 30,
+    "queue_unknown": true,
+    "never_create_unknown": true,
+    "services": {
+      "acoustid": {
+        "enabled": true,
+        "api_key": "",
+        "timeout": 10,
+        "max_results": 5
+      },
+      "musicbrainz": {
+        "enabled": true,
+        "app_name": "DJ-Music-Cleanup/2.0",
+        "contact": "support@example.com",
+        "timeout": 15
+      }
+    }
+  },
+
+  "features": {
+    "enable_progress_bars": true,
+    "enable_reports": true,
+    "enable_undo_scripts": true,
+    "enable_statistics": true
+  },
+  
+  "advanced": {
+    "protected_paths": [],
+    "custom_genres": {},
+    "quality_scoring": {
+      "bitrate_weight": 0.4,
+      "sample_rate_weight": 0.3,
+      "format_weight": 0.2,
+      "file_size_weight": 0.1
+    }
+  }
+}

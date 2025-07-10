@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "description": "Advanced configuration with professional audio features",
+  
+  "audio": {
+    "fingerprint_algorithm": "chromaprint",
+    "fingerprint_length": 120,
+    "duplicate_action": "move",
+    "duplicate_similarity": 0.95,
+    "min_health_score": 50.0,
+    "silence_threshold": 0.001,
+    "defect_sample_duration": 30.0,
+    "supported_formats": [".mp3", ".flac", ".wav", ".m4a", ".aac", ".ogg", ".wma"]
+  },
+  
+  "processing": {
+    "batch_size": 50,
+    "max_workers": 4,
+    "memory_limit_mb": 1024,
+    "enable_recovery": true,
+    "checkpoint_interval": 300,
+    "integrity_level": "checksum"
+  },
+  
+  "output_directories": {
+    "organized_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "duplicates_dir": "./rejected/duplicates",
+    "low_quality_dir": "./rejected/low_quality",
+    "corrupted_dir": "./rejected/corrupted",
+    "auto_create_dirs": true
+  },
+  
+  "organization": {
+    "structure_template": "{genre}/{artist}/{artist} - {title}",
+    "quality_indicators": true,
+    "handle_duplicates": true,
+    "quarantine_defective": true,
+    "create_backups": false
+  },
+  
+  "ui": {
+    "progress_mode": "detailed",
+    "log_level": "DEBUG",
+    "color_output": true,
+    "verbose_errors": true
+  },
+  
+  "workspace_directory": "./workspace",
+  "dry_run": false
+}

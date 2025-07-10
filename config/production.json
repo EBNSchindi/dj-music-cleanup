@@ -1,0 +1,193 @@
+{
+  "version": "2.0.0",
+  "description": "Production configuration optimized for large DJ libraries and professional use",
+  
+  "streaming_config": {
+    "batch_size": 100,
+    "max_workers": 8,
+    "memory_limit_mb": 2048,
+    "chunk_size_mb": 64,
+    "enable_parallel_processing": true,
+    "enable_memory_monitoring": true,
+    "optimize_for_large_libraries": true
+  },
+  
+  "recovery_config": {
+    "enable_auto_checkpoints": true,
+    "checkpoint_interval": 300,
+    "max_checkpoints": 100,
+    "enable_crash_detection": true,
+    "workspace_cleanup_days": 30,
+    "enable_backup_verification": true
+  },
+  
+  "processing": {
+    "audio_formats": [
+      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
+      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
+    ],
+    "quality_threshold": 192,
+    "enable_fingerprinting": true,
+    "fingerprinting_timeout": 60,
+    "metadata_timeout": 30,
+    "enable_format_validation": true,
+    "parallel_fingerprinting": true
+  },
+  
+  "paths": {
+    "output_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "create_if_missing": true
+  },
+
+  "output_directories": {
+    "organized_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "duplicates_dir": "./rejected/duplicates",
+    "low_quality_dir": "./rejected/low_quality",
+    "corrupted_dir": "./rejected/corrupted",
+    "metadata_queue_dir": "./metadata_queue",
+    "auto_create_dirs": true
+  },
+  
+  "organization": {
+    "structure": "genre/decade",
+    "naming_pattern": "{artist} - {title} [QS{score}%]",
+    "handle_duplicates": "keep_highest_quality",
+    "create_unknown_folders": false,
+    "sanitize_filenames": true,
+    "max_filename_length": 255,
+    "enable_conflict_resolution": true,
+    "preserve_original_dates": true
+  },
+
+  "rejection": {
+    "keep_structure": true,
+    "create_manifest": true,
+    "categories": {
+      "duplicates": "duplicates",
+      "low_quality": "low_quality",
+      "corrupted": "corrupted",
+      "unsupported": "unsupported",
+      "invalid_metadata": "invalid_metadata",
+      "processing_errors": "errors"
+    },
+    "enable_automatic_analysis": true,
+    "generate_reports": true
+  },
+
+  "quality": {
+    "min_score": 80,
+    "always_keep_best": true,
+    "auto_reject_below": 60,
+    "production_threshold": 85
+  },
+
+  "metadata": {
+    "fingerprint_first": true,
+    "min_confidence": 0.85,
+    "cache_ttl_days": 60,
+    "queue_unknown": true,
+    "never_create_unknown": true,
+    "services": {
+      "acoustid": {
+        "enabled": true,
+        "api_key": "",
+        "timeout": 20,
+        "max_results": 10
+      },
+      "musicbrainz": {
+        "enabled": true,
+        "app_name": "DJ-Music-Cleanup-Pro/2.0",
+        "contact": "admin@example.com",
+        "timeout": 30
+      }
+    }
+  },
+  
+  "integrity": {
+    "level": "paranoid",
+    "checksum_algorithm": "sha256",
+    "enable_caching": true,
+    "cache_max_age_days": 30,
+    "enable_repair_suggestions": true,
+    "parallel_integrity_checks": true,
+    "enable_backup_integrity": true
+  },
+  
+  "database": {
+    "backend": "sqlite",
+    "connection_pool_size": 10,
+    "enable_wal_mode": true,
+    "vacuum_interval_days": 7,
+    "enable_optimization": true,
+    "enable_foreign_keys": true,
+    "cache_size_mb": 256
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file": "logs/production.log",
+    "max_size_mb": 100,
+    "backup_count": 30,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "enable_rotation": true,
+    "enable_compression": true
+  },
+  
+  "features": {
+    "enable_progress_bars": true,
+    "enable_reports": true,
+    "enable_undo_scripts": true,
+    "enable_statistics": true,
+    "enable_performance_monitoring": true,
+    "enable_detailed_reporting": true
+  },
+  
+  "performance": {
+    "enable_cpu_scaling": true,
+    "enable_io_optimization": true,
+    "prefetch_metadata": true,
+    "cache_fingerprints": true,
+    "optimize_database_queries": true
+  },
+  
+  "security": {
+    "enable_file_permissions_check": true,
+    "verify_source_paths": true,
+    "enable_safe_mode": true,
+    "backup_before_operations": true
+  },
+  
+  "advanced": {
+    "protected_paths": [
+      "/System/",
+      "/Windows/",
+      "/usr/",
+      "/bin/",
+      "/sbin/",
+      "C:\\Windows\\",
+      "C:\\Program Files\\"
+    ],
+    "custom_genres": {
+      "Electronic Dance Music": ["edm", "electronic", "dance"],
+      "Hip Hop": ["hip hop", "rap", "hip-hop"],
+      "House": ["house", "deep house", "tech house"],
+      "Techno": ["techno", "minimal", "acid"],
+      "Trance": ["trance", "progressive", "uplifting"],
+      "Drum & Bass": ["dnb", "drum and bass", "jungle"],
+      "Dubstep": ["dubstep", "brostep", "melodic dubstep"]
+    },
+    "quality_scoring": {
+      "bitrate_weight": 0.35,
+      "sample_rate_weight": 0.25,
+      "format_weight": 0.25,
+      "file_size_weight": 0.15
+    },
+    "enterprise_features": {
+      "enable_audit_logging": true,
+      "enable_compliance_mode": true,
+      "enable_multi_user_support": false
+    }
+  }
+}

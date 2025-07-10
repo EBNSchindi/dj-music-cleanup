@@ -1,0 +1,25 @@
+# DJ Music Cleanup Tool - Professional Audio Dependencies
+
+# Core Audio Processing
+mutagen>=1.45.0          # Audio metadata extraction and manipulation
+pyacoustid>=1.2.0        # AcoustID fingerprinting client
+chromaprint-python>=0.4  # Python bindings for Chromaprint
+
+# Audio Analysis and Processing  
+numpy>=1.21.0            # Numerical computing for audio analysis
+scipy>=1.7.0             # Scientific computing for signal processing
+librosa>=0.9.0           # Audio and music analysis
+soundfile>=0.10.0        # Audio file I/O
+
+# Progress and UI
+tqdm>=4.62.0             # Progress bars
+rich>=12.0.0             # Rich text and beautiful formatting
+
+# Development and Testing
+pytest>=6.2.0           # Testing framework
+pytest-cov>=2.12.0      # Coverage testing
+
+# System Dependencies (install via system package manager):
+# Ubuntu/Debian: sudo apt-get install libchromaprint-dev ffmpeg
+# macOS: brew install chromaprint ffmpeg
+# Windows: Install from https://acoustid.org/chromaprint

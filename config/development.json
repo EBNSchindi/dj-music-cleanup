@@ -1,0 +1,112 @@
+{
+  "version": "2.0.0",
+  "description": "Development configuration with enhanced debugging and testing features",
+  
+  "streaming_config": {
+    "batch_size": 10,
+    "max_workers": 2,
+    "memory_limit_mb": 256,
+    "chunk_size_mb": 16,
+    "enable_parallel_processing": true,
+    "enable_memory_monitoring": true,
+    "debug_memory_usage": true
+  },
+  
+  "recovery_config": {
+    "enable_auto_checkpoints": true,
+    "checkpoint_interval": 60,
+    "max_checkpoints": 50,
+    "enable_crash_detection": true,
+    "workspace_cleanup_days": 1,
+    "debug_checkpoints": true
+  },
+  
+  "processing": {
+    "audio_formats": [
+      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
+      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
+    ],
+    "quality_threshold": 64,
+    "enable_fingerprinting": true,
+    "fingerprinting_timeout": 10,
+    "metadata_timeout": 5,
+    "enable_format_validation": true,
+    "debug_processing": true
+  },
+  
+  "output_directories": {
+    "organized_dir": "./organized",
+    "rejected_dir": "./rejected",
+    "duplicates_dir": "./rejected/duplicates",
+    "low_quality_dir": "./rejected/low_quality",
+    "corrupted_dir": "./rejected/corrupted",
+    "auto_create_dirs": true
+  },
+  
+  "organization": {
+    "structure": "genre/decade",
+    "naming_pattern": "{artist} - {title}",
+    "handle_duplicates": "keep_highest_quality",
+    "create_unknown_folders": true,
+    "sanitize_filenames": true,
+    "max_filename_length": 100,
+    "debug_organization": true
+  },
+  
+  "integrity": {
+    "level": "deep",
+    "checksum_algorithm": "sha256",
+    "enable_caching": true,
+    "cache_max_age_days": 1,
+    "enable_repair_suggestions": true,
+    "debug_integrity": true
+  },
+  
+  "database": {
+    "backend": "sqlite",
+    "connection_pool_size": 2,
+    "enable_wal_mode": true,
+    "vacuum_interval_days": 1,
+    "debug_queries": true,
+    "enable_foreign_keys": true
+  },
+  
+  "logging": {
+    "level": "DEBUG",
+    "file": "logs/development.log",
+    "max_size_mb": 50,
+    "backup_count": 10,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
+    "enable_console": true
+  },
+  
+  "features": {
+    "enable_progress_bars": true,
+    "enable_reports": true,
+    "enable_undo_scripts": true,
+    "enable_statistics": true,
+    "enable_debugging": true,
+    "enable_profiling": true
+  },
+  
+  "testing": {
+    "enable_test_mode": true,
+    "mock_external_services": true,
+    "test_data_path": "tests/fixtures",
+    "enable_performance_tracking": true
+  },
+  
+  "advanced": {
+    "protected_paths": ["tests/", "docs/", ".git/"],
+    "custom_genres": {
+      "Test Genre": ["test", "demo", "sample"]
+    },
+    "quality_scoring": {
+      "bitrate_weight": 0.4,
+      "sample_rate_weight": 0.3,
+      "format_weight": 0.2,
+      "file_size_weight": 0.1
+    },
+    "debug_all_modules": true
+  }
+}
