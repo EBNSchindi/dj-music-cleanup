@@ -27,7 +27,7 @@ from rich import box
 
 from ..core.config_manager import get_config_manager, MusicCleanupConfig
 from ..core.unified_database import get_unified_database
-from ..core.orchestrator_refactored import MusicCleanupOrchestrator
+from ..core.orchestrator import MusicCleanupOrchestrator
 from ..core.streaming import StreamingConfig
 from ..utils.error_handler import handle_user_error
 from .. import __version__
@@ -231,20 +231,13 @@ class InteractiveMenu:
             streaming_config = StreamingConfig()
             config_dict = self._config_to_dict(self.config)
             
-            if self._use_professional_mode():
-                orchestrator = ProfessionalMusicCleanupOrchestrator(
-                    config=config_dict,
-                    streaming_config=streaming_config,
-                    dry_run=False
-                )
-                pipeline_method = orchestrator.run_professional_pipeline
-            else:
-                orchestrator = MusicCleanupOrchestrator(
-                    config=config_dict,
-                    streaming_config=streaming_config,
-                    dry_run=False
-                )
-                pipeline_method = lambda sf, pc: orchestrator.run_organization_pipeline(sf, target_folder, pc)
+            # Always use MusicCleanupOrchestrator - ProfessionalMusicCleanupOrchestrator doesn't exist
+            orchestrator = MusicCleanupOrchestrator(
+                config=config_dict,
+                streaming_config=streaming_config,
+                dry_run=False
+            )
+            pipeline_method = lambda sf, pc: orchestrator.run_organization_pipeline(sf, target_folder, pc)
             
             # Progress tracking
             with Progress(

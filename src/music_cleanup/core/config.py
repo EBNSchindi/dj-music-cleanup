@@ -1,4 +1,12 @@
 """
+DEPRECATED: Use config_manager.py instead.
+
+This module is maintained for backward compatibility only.
+Please migrate to the new config_manager system which provides:
+- Type-safe configuration with dataclasses
+- Hierarchical configuration loading
+- Better validation and error handling
+
 Core configuration module for DJ Music Library Cleanup Tool
 """
 import os
@@ -213,7 +221,18 @@ class Config:
 _config_instance = None
 
 def get_config(config_file: str = None) -> Config:
-    """Get configuration singleton instance"""
+    """
+    Get configuration singleton instance.
+    
+    DEPRECATED: This function is deprecated. Use get_config_manager() from 
+    config_manager.py instead for better configuration management.
+    """
+    import warnings
+    warnings.warn(
+        "get_config() is deprecated. Use get_config_manager() from config_manager.py instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     global _config_instance
     if _config_instance is None:
         _config_instance = Config(config_file)

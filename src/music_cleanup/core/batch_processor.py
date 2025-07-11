@@ -138,7 +138,7 @@ class BatchProcessor:
     
     def _process_analysis_batch(self, batch: List[str]) -> List[Dict[str, Any]]:
         """
-        Process a single batch of files for analysis.
+        Process a single batch of files for analysis using FileAnalyzer.
         
         Args:
             batch: List of file paths in current batch
@@ -146,23 +146,34 @@ class BatchProcessor:
         Returns:
             List of analyzed file information
         """
+        from .file_analyzer import FileAnalyzer
+        from ..utils.analysis_converters import convert_to_file_info_dict
+        
+        # Create analyzer with orchestrator's config
+        analyzer = FileAnalyzer(
+            enable_fingerprinting=self.config.get('enable_fingerprinting', False),
+            enable_defect_detection=self.config.get('enable_defect_detection', True),
+            fingerprint_algorithm=self.config.get('fingerprint_algorithm', 'chromaprint'),
+            min_health_score=self.config.get('min_health_score', 50.0)
+        )
+        
         analyzed_files = []
         
-        for file_path in batch:
-            try:
-                file_info = self.orchestrator._analyze_file_complete(file_path)
-                if file_info:
-                    # Add audio issues from health analysis
-                    if 'defects' in file_info:
-                        file_info['audio_issues'] = file_info['defects']
-                    else:
-                        file_info['audio_issues'] = []
-                    
-                    analyzed_files.append(file_info)
-                    
-            except Exception as e:
-                self.logger.error(f"Error analyzing file {file_path}: {e}")
-                continue
+        # Use FileAnalyzer's batch processing
+        results = analyzer.analyze_batch(batch)
+        
+        # Convert results to legacy format
+        for result in results:
+            if result and result.processed_successfully:
+                file_info = convert_to_file_info_dict(result)
+                
+                # Add audio issues from health analysis
+                if result.health_issues:
+                    file_info['audio_issues'] = result.health_issues
+                else:
+                    file_info['audio_issues'] = []
+                
+                analyzed_files.append(file_info)
         
         return analyzed_files
     

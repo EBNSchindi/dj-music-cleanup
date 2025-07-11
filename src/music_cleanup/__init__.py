@@ -20,7 +20,7 @@ __email__ = "dj-music-cleanup@example.com"
 __license__ = "MIT"
 
 # Export main classes and functions
-from .core.config import Config, get_config
+from .core.config_manager import get_config_manager, MusicCleanupConfig
 from .core.unified_database import UnifiedDatabase, get_unified_database
 from .core.streaming import StreamingConfig, FileDiscoveryStream, ParallelStreamProcessor
 from .core.transactions import AtomicFileOperations
@@ -33,8 +33,8 @@ __all__ = [
     "__author__", 
     "__email__",
     "__license__",
-    "Config",
-    "get_config",
+    "MusicCleanupConfig", 
+    "get_config_manager",
     "UnifiedDatabase",
     "get_unified_database",
     "StreamingConfig",

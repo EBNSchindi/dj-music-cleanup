@@ -47,7 +47,7 @@ def main():
         # Phase 2: FIXED Metadata-First Processing
         print("\\n🔍 PHASE 2: FIXED Metadata-First Processing")
         print("-" * 50)
-        metadata_results = process_metadata_first_fixed(audio_files)
+        metadata_results = process_metadata_first(audio_files)
         
         # Phase 3: Quality Analysis
         print("\\n🎯 PHASE 3: Quality Analysis")

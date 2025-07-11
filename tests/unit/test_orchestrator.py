@@ -44,9 +44,9 @@ class TestMusicCleanupOrchestrator:
     def streaming_config(self):
         """Create streaming configuration."""
         return StreamingConfig(
-            batch_size=10,
+            file_discovery_batch_size=10,
             max_workers=2,
-            memory_limit_mb=100
+            max_memory_usage_mb=100
         )
     
     @pytest.fixture

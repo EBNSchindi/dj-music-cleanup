@@ -20,14 +20,34 @@
   },
   
   "processing": {
-    "audio_formats": [
-      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
-      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
-    ],
     "quality_threshold": 128,
     "enable_fingerprinting": true,
     "fingerprinting_timeout": 30,
-    "metadata_timeout": 10
+    "metadata_timeout": 10,
+    "batch_size": 100,
+    "max_workers": 4,
+    "memory_limit_mb": 512,
+    "integrity_level": "basic"
+  },
+  
+  "audio": {
+    "supported_formats": [
+      ".mp3", ".flac", ".wav", ".m4a", ".aac", 
+      ".ogg", ".opus", ".wma", ".mp4", ".m4p"
+    ],
+    "fingerprint_algorithm": "chromaprint",
+    "duplicate_action": "move",
+    "min_health_score": 70,
+    "fingerprint_length": 120,
+    "duplicate_similarity": 0.9,
+    "silence_threshold": -40,
+    "defect_sample_duration": 10
+  },
+  
+  "ui": {
+    "progress_mode": "detailed",
+    "log_level": "INFO",
+    "verbose_errors": true
   },
   
   "paths": {
@@ -49,7 +69,7 @@
   
   "organization": {
     "structure": "genre/decade",
-    "naming_pattern": "{artist} - {title} [QS{score}%]",
+    "naming_pattern": "{year} - {artist} - {title} [QS{score}%]",
     "handle_duplicates": "keep_highest_quality",
     "create_unknown_folders": false,
     "sanitize_filenames": true,

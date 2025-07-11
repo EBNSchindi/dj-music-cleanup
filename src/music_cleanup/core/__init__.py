@@ -1,6 +1,6 @@
 """Core components for DJ Music Cleanup Tool."""
 
-from .config import Config, get_config
+from .config_manager import get_config_manager, MusicCleanupConfig
 from .unified_database import UnifiedDatabase, get_unified_database
 from .streaming import (
     StreamingConfig, 
@@ -15,8 +15,8 @@ from .recovery import CrashRecoveryManager, CheckpointType, RecoveryState, Recov
 from .rollback import RollbackManager, RollbackScope
 
 __all__ = [
-    "Config",
-    "get_config", 
+    "MusicCleanupConfig",
+    "get_config_manager", 
     "UnifiedDatabase",
     "get_unified_database",
     "StreamingConfig",

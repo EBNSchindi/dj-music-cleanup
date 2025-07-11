@@ -58,7 +58,7 @@ class ToolChecker:
             'fpcalc': ToolInfo(
                 name="Chromaprint Fingerprinter",
                 command="fpcalc",
-                priority=ToolPriority.REQUIRED,
+                priority=ToolPriority.RECOMMENDED,  # Changed from REQUIRED to RECOMMENDED since fingerprinting can be disabled
                 package_name="chromaprint",
                 install_instructions={
                     'linux': "sudo apt-get install libchromaprint-tools",

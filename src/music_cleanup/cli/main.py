@@ -17,7 +17,7 @@ from .. import __version__
 from ..core.config_manager import get_config_manager, MusicCleanupConfig
 from ..core.recovery import CrashRecoveryManager, CheckpointType
 from ..core.streaming import StreamingConfig, StreamingConfigManager
-from ..core.orchestrator_refactored import MusicCleanupOrchestrator
+from ..core.orchestrator import MusicCleanupOrchestrator
 from ..utils.progress import ProgressReporter
 from ..utils.integrity import IntegrityLevel
 from ..utils.error_handler import handle_user_error
@@ -285,14 +285,59 @@ def validate_arguments(args: argparse.Namespace) -> bool:
     return True
 
 
+def _convert_config_to_dict(full_config: MusicCleanupConfig, args: argparse.Namespace = None) -> Dict[str, Any]:
+    """Convert new MusicCleanupConfig to dictionary format for backward compatibility."""
+    config_dict = {
+        'output_directory': full_config.output_directory or full_config.output_directories.organized_dir,
+        'audio_formats': full_config.audio.supported_formats,
+        'batch_size': full_config.processing.batch_size,
+        'max_workers': full_config.processing.max_workers,
+        'fingerprint_algorithm': full_config.audio.fingerprint_algorithm,
+        'fingerprint_length': full_config.audio.fingerprint_length,
+        'duplicate_similarity': full_config.audio.duplicate_similarity,
+        'duplicate_action': full_config.audio.duplicate_action,
+        'min_health_score': full_config.audio.min_health_score,
+        'silence_threshold': full_config.audio.silence_threshold,
+        'defect_sample_duration': full_config.audio.defect_sample_duration,
+        'integrity_level': full_config.processing.integrity_level,
+        'enable_recovery': full_config.processing.enable_recovery,
+        'checkpoint_interval': full_config.processing.checkpoint_interval,
+        'memory_limit_mb': full_config.processing.memory_limit_mb,
+    }
+    
+    # Add args-specific overrides if provided
+    if args:
+        if hasattr(args, 'enable_fingerprinting'):
+            config_dict['enable_fingerprinting'] = args.enable_fingerprinting
+        if hasattr(args, 'skip_duplicates'):
+            config_dict['skip_duplicates'] = args.skip_duplicates
+    
+    return config_dict
+
+
 def run_analysis_mode(args: argparse.Namespace) -> int:
     """Run analysis mode - scan and report without changes."""
     print("🔍 Analysis Mode - Scanning music library...")
     logger = logging.getLogger(__name__)
     
     try:
-        # Load configuration
-        config = get_config(args.config)
+        # Load configuration using new config_manager
+        config_manager = get_config_manager()
+        full_config = config_manager.load_config(
+            project_config=args.config if args.config else None,
+            cli_overrides={
+                'dry_run': True,  # Analysis mode is always dry run
+                'audio': {
+                    'min_health_score': getattr(args, 'min_health_score', 50.0)
+                },
+                'processing': {
+                    'enable_recovery': args.enable_recovery
+                }
+            }
+        )
+        
+        # Convert to dictionary for backward compatibility
+        config = _convert_config_to_dict(full_config, args)
         
         # Setup streaming configuration
         streaming_config = _create_streaming_config(args)
@@ -302,7 +347,6 @@ def run_analysis_mode(args: argparse.Namespace) -> int:
             config=config,
             streaming_config=streaming_config,
             workspace_dir=args.workspace,
-            enable_recovery=args.enable_recovery,
             dry_run=True  # Analysis mode is always dry run
         )
         
@@ -402,23 +446,38 @@ def run_cleanup_mode(args: argparse.Namespace) -> int:
     logger = logging.getLogger(__name__)
     
     try:
-        # Load configuration
-        config = get_config(args.config)
+        # Load configuration using new config_manager
+        config_manager = get_config_manager()
+        full_config = config_manager.load_config(
+            project_config=args.config if args.config else None,
+            cli_overrides={
+                'dry_run': args.dry_run,
+                'audio': {
+                    'fingerprint_algorithm': args.fingerprint_algorithm,
+                    'duplicate_action': args.duplicate_action,
+                    'min_health_score': float(args.min_health_score)
+                },
+                'processing': {
+                    'integrity_level': args.integrity_level,
+                    'enable_recovery': args.enable_recovery
+                }
+            }
+        )
         
-        # Setup streaming configuration
-        streaming_config = _create_streaming_config(args)
-        
-        # Update config for cleanup mode
+        # Convert to dictionary for backward compatibility
+        config = _convert_config_to_dict(full_config, args)
         config['enable_fingerprinting'] = args.enable_fingerprinting
         config['skip_duplicates'] = args.skip_duplicates
         config['integrity_level'] = args.integrity_level
+        
+        # Setup streaming configuration
+        streaming_config = _create_streaming_config(args)
         
         # Create orchestrator
         orchestrator = MusicCleanupOrchestrator(
             config=config,
             streaming_config=streaming_config,
             workspace_dir=args.workspace,
-            enable_recovery=args.enable_recovery,
             dry_run=args.dry_run
         )
         
@@ -486,8 +545,20 @@ def run_recovery_mode(args: argparse.Namespace) -> int:
     logger = logging.getLogger(__name__)
     
     try:
-        # Load configuration
-        config = get_config(args.config)
+        # Load configuration using new config_manager
+        config_manager = get_config_manager()
+        full_config = config_manager.load_config(
+            project_config=args.config if args.config else None,
+            cli_overrides={
+                'dry_run': args.dry_run,
+                'processing': {
+                    'enable_recovery': True  # Always enabled for recovery mode
+                }
+            }
+        )
+        
+        # Convert to dictionary for backward compatibility
+        config = _convert_config_to_dict(full_config, args)
         
         # Setup streaming configuration
         streaming_config = _create_streaming_config(args)
@@ -497,7 +568,6 @@ def run_recovery_mode(args: argparse.Namespace) -> int:
             config=config,
             streaming_config=streaming_config,
             workspace_dir=args.workspace,
-            enable_recovery=True,  # Always enabled for recovery mode
             dry_run=args.dry_run
         )
         
@@ -797,26 +867,14 @@ def _load_and_validate_config(args: argparse.Namespace) -> Tuple[Optional[Dict],
 
 def _create_orchestrator(args: argparse.Namespace, config: Dict, streaming_config: StreamingConfig) -> Tuple[Any, bool]:
     """Create the appropriate orchestrator based on configuration."""
-    if getattr(args, 'use_professional_pipeline', False):
-        from ..core.orchestrator_professional import ProfessionalMusicCleanupOrchestrator
-        orchestrator = ProfessionalMusicCleanupOrchestrator(
-            config=config,
-            streaming_config=streaming_config,
-            workspace_dir=args.workspace,
-            dry_run=args.dry_run,
-            fingerprint_algorithm=getattr(args, 'fingerprint_algorithm', 'chromaprint'),
-            duplicate_action=getattr(args, 'duplicate_action', 'move'),
-            min_health_score=getattr(args, 'min_health_score', 50.0)
-        )
-        return orchestrator, True
-    else:
-        orchestrator = MusicCleanupOrchestrator(
-            config=config,
-            streaming_config=streaming_config,
-            workspace_dir=args.workspace,
-            dry_run=args.dry_run
-        )
-        return orchestrator, False
+    # Create standard orchestrator
+    orchestrator = MusicCleanupOrchestrator(
+        config=config,
+        streaming_config=streaming_config,
+        workspace_dir=args.workspace,
+        dry_run=args.dry_run
+    )
+    return orchestrator, False
 
 
 def _create_progress_callback(args: argparse.Namespace) -> Optional[callable]:

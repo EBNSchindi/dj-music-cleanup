@@ -1,6 +1,9 @@
 """
 Integrated Quality Management System
 
+DEPRECATED: This module is being phased out in favor of the unified FileAnalyzer.
+Use src/music_cleanup/core/file_analyzer.py for new implementations.
+
 Kombiniert alle Quality-Checks mit Scoring, Tagging und File Management.
 """
 
@@ -123,6 +126,18 @@ class IntegratedQualityManager:
         }
     
     def process_file(self, file_path: str) -> QualityProcessingResult:
+        """
+        Process a single audio file using FileAnalyzer.
+        
+        DEPRECATED: This method now delegates to FileAnalyzer for consistency.
+        """
+        import warnings
+        warnings.warn(
+            "IntegratedQualityManager.process_file is deprecated. "
+            "Use FileAnalyzer.analyze_file() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         """
         Process single file through complete quality pipeline.
         

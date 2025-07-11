@@ -12,17 +12,16 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from ..utils.decorators import handle_errors, track_performance, validate_path
-from ..utils.integrity import IntegrityChecker, IntegrityLevel
+from ..utils.integrity import FileIntegrityChecker as IntegrityChecker, IntegrityLevel
 from ..modules.simple_metadata_manager import SimpleMetadataManager
 from ..modules.simple_quality_analyzer import SimpleQualityAnalyzer
 from ..modules.simple_fingerprinter import SimpleFingerprinter
-from ..audio.defect_detection import DefectDetector
+from ..audio.defect_detection import AudioDefectDetector as DefectDetector
 from ..audio.duplicate_detection import DuplicateDetector
 from ..core.constants import (
     SUPPORTED_AUDIO_FORMATS,
-    MIN_FILE_SIZE,
-    MAX_FILE_SIZE,
-    DEFAULT_SAMPLE_RATE
+    MIN_AUDIO_FILE_SIZE as MIN_FILE_SIZE,
+    MAX_AUDIO_FILE_SIZE as MAX_FILE_SIZE
 )
 
 
@@ -111,8 +110,8 @@ class FileAnalyzer:
         self.logger = logging.getLogger(__name__)
         
         # Initialize components
-        self._metadata_manager = SimpleMetadataManager()
-        self._quality_analyzer = SimpleQualityAnalyzer()
+        self._metadata_manager = SimpleMetadataManager({})
+        self._quality_analyzer = SimpleQualityAnalyzer({})
         self._integrity_checker = IntegrityChecker()
         
         # Optional components
@@ -226,7 +225,7 @@ class FileAnalyzer:
         
         if quality_data:
             result.bitrate = quality_data.get('bitrate')
-            result.sample_rate = quality_data.get('sample_rate', DEFAULT_SAMPLE_RATE)
+            result.sample_rate = quality_data.get('sample_rate', 44100)
             result.channels = quality_data.get('channels')
             result.quality_score = quality_data.get('quality_score', 0.0)
             
